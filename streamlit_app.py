@@ -1,24 +1,53 @@
 import streamlit as st
-from save_to_file import save_to_file
+from pages.settings import Settings
 
-def checkin_user(user,date):
+if "role" not in st.session_state:
+    st.session_state.role = None
+    st.session_state.settings_changed = False
+    st.session_state.user_settings = None
+    st.session_state.has_checked_in = False
 
-    if(user != "" and user.isalpha()):
-        user = user.title()
-        if(user in st.secrets["exercise_users"].split(",")):
-            st.session_state.title = f"Thank you for checking-in, {user}!"
-            st.session_state.disabled = True
-            save_to_file(user,date)
-    else:
-        st.session_state.title = "Please input a valid name."
+ROLES = [None, "Requester"]
 
-if 'title' not in st.session_state:
-    st.session_state.title = "Weekly Workout Check-In"
-    st.session_state.disabled = False
+def login():
+    st.header("Log in")
+    role = st.selectbox("Choose your role", ROLES)
 
-st.title(st.session_state.title)
-if(not st.session_state.disabled):
-    date = st.date_input("Date to check-in:", "today",format="DD/MM/YYYY",disabled=st.session_state.disabled)
-    user = st.text_input("Who do you want to check-in?",disabled=st.session_state.disabled)
-    checkin_btn = st.button('Check-in', on_click=checkin_user,
-        args=(user,date),disabled=st.session_state.disabled)
+    if st.button("Log in"):
+        st.session_state.role = role
+        st.rerun()
+
+def logout():
+    st.session_state.role = None
+    st.rerun()
+
+role = st.session_state.role
+settings_page = Settings()
+
+logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
+settings = st.Page(settings_page.show_settings, title="Settings", icon=":material/settings:")
+check_in = st.Page(
+    "request/check_in.py",
+    title="Check in",
+    icon=":material/check:",
+    default=(role == "Requester"),
+)
+leaderboard = st.Page(
+    "request/leaderboard.py", title="Leaderboard", icon=":material/crown:"
+)
+
+account_pages = [settings,logout_page]
+request_pages = [check_in, leaderboard]
+
+st.logo("images/logo.png", icon_image="images/dumbell.png",size="large")
+
+page_dict = {}
+if st.session_state.role in ["Requester"]:
+    page_dict["Workouts"] = request_pages
+
+if len(page_dict) > 0:
+    pg = st.navigation(page_dict | {"Account": account_pages})
+else:
+    pg = st.navigation([st.Page(login)])
+
+pg.run()
