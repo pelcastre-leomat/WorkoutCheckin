@@ -1,14 +1,15 @@
 import streamlit as st
 import time
 from datetime import datetime
-from utils.fetch_workouts import fetch_workouts
+from utils.fetch_workouts import populate_leaderboard
 
 # Cached data fetch
 @st.cache_data(persist="disk")
 def fetch_leaderboard():
     print("RUNNING")  # Will only appear when cache is refreshed
     time.sleep(1)  # Simulate slow fetch
-    df = fetch_workouts()
+    df = populate_leaderboard()
+    # df = None
     last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return df, last_updated
 

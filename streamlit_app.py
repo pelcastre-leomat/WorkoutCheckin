@@ -1,39 +1,55 @@
+import re
+import sys
 import streamlit as st
 from pages.settings import Settings
+from utils.db_connection import DB_Connection
 
-if "role" not in st.session_state:
-    st.session_state.role = None
-    st.session_state.settings_changed = False
-    st.session_state.user_settings = None
-    st.session_state.has_checked_in = False
-
-ROLES = [None, "Requester"]
+NAMES = [name.lower() for name in st.secrets["exercise_users"].split(",")]
 
 def login():
     st.header("Log in")
-    role = st.selectbox("Choose your role", ROLES)
-
-    if st.button("Log in"):
-        st.session_state.role = role
-        st.rerun()
+    with st.form("login_form"):
+        regex = re.compile('[^a-zA-Z]')
+        role = regex.sub('', st.text_input("Input your name:")).lower()
+        submitted = st.form_submit_button("Log in")
+        if submitted:
+            if(role in NAMES):
+                st.session_state.logged_name = role
+                st.session_state.db_connection = DB_Connection()
+                st.rerun()
+            else:
+                st.error("Login failed. Verify you are an allowed user.",icon="⛔")
 
 def logout():
-    st.session_state.role = None
+    st.session_state.logged_name = None
     st.rerun()
 
-role = st.session_state.role
+if "logged_name" not in st.session_state:
+    #Simple login skip for testing
+    if len(sys.argv)>1:
+        st.session_state.auto_login_name = sys.argv[1]
+        st.session_state.auto_login = True
+        st.session_state.db_connection = DB_Connection()
+
+
+    st.session_state.logged_name = st.session_state.auto_login_name
+    st.session_state.settings_changed = False
+    st.session_state.user_settings = None
+    st.session_state.has_checked_in = False
+    st.session_state.offline = True
+
+name = st.session_state.logged_name
 settings_page = Settings()
 
 logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 settings = st.Page(settings_page.show_settings, title="Settings", icon=":material/settings:")
 check_in = st.Page(
-    "request/check_in.py",
+    "sections/check_in.py",
     title="Check in",
     icon=":material/check:",
-    default=(role == "Requester"),
 )
 leaderboard = st.Page(
-    "request/leaderboard.py", title="Leaderboard", icon=":material/crown:"
+    "sections/leaderboard.py", title="Leaderboard", icon=":material/crown:"
 )
 
 account_pages = [settings,logout_page]
@@ -42,7 +58,7 @@ request_pages = [check_in, leaderboard]
 st.logo("images/logo.png", icon_image="images/dumbell.png",size="large")
 
 page_dict = {}
-if st.session_state.role in ["Requester"]:
+if st.session_state.logged_name in NAMES or st.session_state.auto_login:
     page_dict["Workouts"] = request_pages
 
 if len(page_dict) > 0:
