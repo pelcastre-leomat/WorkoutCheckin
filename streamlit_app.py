@@ -30,13 +30,12 @@ if "logged_name" not in st.session_state:
         st.session_state.auto_login_name = sys.argv[1]
         st.session_state.auto_login = True
         st.session_state.db_connection = DB_Connection()
-
+        st.session_state.offline = True if sys.argv[2] == "True" else False
 
     st.session_state.logged_name = st.session_state.auto_login_name
     st.session_state.settings_changed = False
     st.session_state.user_settings = None
     st.session_state.has_checked_in = False
-    st.session_state.offline = True
 
 name = st.session_state.logged_name
 settings_page = Settings()

@@ -8,21 +8,25 @@ class DB_Connection:
         self.base_url = f"https://api.sheety.co/{secrets['sheet_project_path']}"
         self.headers = {"Authorization": f"Bearer {secrets['sheet_bearer_url']}"}
 
-    def fetch_data_table(self, table_id, offline=False,options=None):
+    def fetch_data_table(self, table_id, offline=False,filter_options=None):
         if(offline):
+            print("Using offline data")
             with open(f"data/{table_id}.json") as f:
                 data = json.load(f)
         else:
-            url = f"{self.base_url}/{table_id}"
+            print("Fetching live data")
+            filter_options = "" if filter_options is None else f"?filter{filter_options}"
+            url = f"{self.base_url}/{table_id}{filter_options}"
+            print(url)
             resp = requests.get(url, headers=self.headers)
             resp.raise_for_status()
             data = resp.json()
+            print(data)
         data = next(iter(data.values()))
         df = pd.DataFrame(data)
         df = df.drop("id",axis=1)
-
-        print(df.to_string())
-        return data
+        print(df)
+        return df
 
     def send_data(self, table_id, data, offline=False):
         if(offline):
