@@ -30,5 +30,14 @@ if(df is None):
 st.markdown(f"**Last updated:** {last_updated}")
 st.info("Depending on your device size, you might need to scroll to see more stats!",icon="ℹ️")
 st.dataframe(df)
+if(datetime.today().weekday() == 4):
+    matches = df[df["Name"] == st.session_state.logged_name.title()]
+    if not matches.empty:
+        user = matches.iloc[0]
+        perc_workouts = user["Workouts Performed"] / user["Workout Goal"]
+        if perc_workouts < 1:
+            st.error(f"It's already Friday but you've only completed {int(100*(perc_workouts))}% of your workouts...",icon="😴")
+
+
 st.write(":red[Please only update once a day]")
 st.button("Update Info",on_click=force_update,kwargs={"df":df},type="primary")

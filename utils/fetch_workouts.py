@@ -31,6 +31,7 @@ def parse_settings(offline=False):
         table_id=DB_Enums.USER_SETTINGS_DB,
         offline=offline
     )
+
     return data
 
 def parse_workouts(data,user_settings):

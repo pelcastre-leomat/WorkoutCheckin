@@ -43,19 +43,20 @@ if "logged_name" not in st.session_state:
     st.session_state.user_settings = None
     st.session_state.has_checked_in = False
 
-name = st.session_state.logged_name
-settings_page = Settings()
+if(st.session_state.logged_name is not None):
+    name = st.session_state.logged_name
+    settings_page = Settings(name)
 
-logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
-settings = st.Page(settings_page.show_settings, title="Settings", icon=":material/settings:")
-check_in = st.Page(
-    "sections/check_in.py",
-    title="Check in",
-    icon=":material/check:",
-)
-leaderboard = st.Page(
-    "sections/leaderboard.py", title="Leaderboard", icon=":material/crown:"
-)
+    logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
+    settings = st.Page(settings_page.show_settings, title="Settings", icon=":material/settings:")
+    check_in = st.Page(
+        "sections/check_in.py",
+        title="Check in",
+        icon=":material/check:",
+    )
+    leaderboard = st.Page(
+        "sections/leaderboard.py", title="Leaderboard", icon=":material/crown:"
+    )
 
 account_pages = [settings,logout_page]
 request_pages = [check_in, leaderboard]
