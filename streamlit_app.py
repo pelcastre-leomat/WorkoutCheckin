@@ -26,9 +26,15 @@ def logout():
 
 if "logged_name" not in st.session_state:
     #Simple login skip for testing
+    st.session_state.auto_login_name = None
+    st.session_state.auto_login = False
+    st.session_state.offline = False
     if len(sys.argv)>1:
-        st.session_state.auto_login_name = sys.argv[1]
-        st.session_state.auto_login = True
+        #CLEAN THIS SHIT UP
+        arg_name = sys.argv[1]
+        if(arg_name != " "):
+            st.session_state.auto_login_name = arg_name
+            st.session_state.auto_login = True
         st.session_state.db_connection = DB_Connection()
         st.session_state.offline = True if sys.argv[2] == "True" else False
 

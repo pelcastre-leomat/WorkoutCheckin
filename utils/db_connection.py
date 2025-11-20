@@ -28,11 +28,16 @@ class DB_Connection:
         print(df)
         return df
 
-    def send_data(self, table_id, data, offline=False):
+    def send_data(self,table_id,sheet_name, data, offline=False):
         if(offline):
-            with open(f"data/{table_id}.json", "w") as f:
-                json.dump(data, f, indent=2)
+            print("Checking in locally")
+            with open(f"data/{table_id}.json") as f:
+                loaded_data = json.load(f)
+            loaded_data[sheet_name].append(data[sheet_name])
+            with open(f"data/{table_id}.json","w") as f:
+                json.dump(loaded_data,f,indent=2)
         else:
+            print("Checking in to live db")
             url = f"{self.base_url}/{table_id}"
             resp = requests.post(url, headers=self.headers, json=data)
             resp.raise_for_status()

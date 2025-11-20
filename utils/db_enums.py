@@ -1,7 +1,8 @@
 from enum import StrEnum
 
-class DB_Enumbs(StrEnum):
+class DB_Enums(StrEnum):
     NAME = "name"
+    DAY = "day"
     WORKOUTS_DB = "workouts"
     USER_SETTINGS_DB = "userSettings"
     PERFORMED_WORKOUTS = "performed_workouts"
