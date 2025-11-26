@@ -6,6 +6,7 @@ import pandas as pd
 
 @st.cache_data(persist="disk")
 def fetch_settings():
+    print("FETCHING SETTINGS")
     data = st.session_state.db_connection.fetch_data_table(
         table_id=DB_Enums.USER_SETTINGS_DB,
         offline=st.session_state.offline
@@ -54,8 +55,6 @@ class Settings:
             }
         }
         data[settings_queue].update(updated_vals)
-        if(st.session_state.offline):
-            data[settings_queue].update({"id":99})
         try:
             update_queue = st.session_state.db_connection.send_data(
                 table_id=DB_Enums.SETTINGS_QUEUE,
@@ -82,6 +81,7 @@ class Settings:
         self.workout_goal = self.user_data[DB_Enums.COST.value]
         n_workouts = self._set_workouts(st.text_input(label="Workout goal",value=self.user_data[DB_Enums.WORKOUT_GOAL.value]))
         cost = self._set_cost(st.text_input(label="Missed workout cost (SEK)",value=self.user_data[DB_Enums.COST.value]))
+        st.info("Settings will be applied every monday and will not be reflected here until then.")
         st.button("Save changes",key="save_btn",on_click=self._send_data,kwargs={"updated_vals":{DB_Enums.WORKOUT_GOAL.value:n_workouts,DB_Enums.COST.value:cost}},disabled=not self.has_changed)
 
 

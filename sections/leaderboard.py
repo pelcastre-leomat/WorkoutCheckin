@@ -21,6 +21,8 @@ def force_update(df):
         msg.success("Successfully updated stats and info",icon="👍")
     else:
         msg.error("Couldn't fetch stats and info, try again later",icon="🔥")
+
+
 st.title(f"Week {datetime.today().isocalendar().week}'s Stats and Info")
 df, last_updated = fetch_leaderboard()
 
@@ -37,6 +39,7 @@ if(datetime.today().weekday() == 4):
         perc_workouts = user["Workouts Performed"] / user["Workout Goal"]
         if perc_workouts < 1:
             st.error(f"It's already Friday but you've only completed {int(100*(perc_workouts))}% of your workouts...",icon="😴")
+
 
 
 st.write(":red[Please only update once a day]")

@@ -3,12 +3,17 @@ import pandas as pd
 import streamlit as st
 from utils.db_enums import DB_Enums
 
+def current_week_key():
+    today = datetime.today()
+    year, week_num, _ = today.isocalendar()
+    return f"{year}-W{week_num}"
+
 def populate_leaderboard():
     offline = st.session_state.offline
     this_week = datetime.today().isocalendar().week
     try:
         workout_data = fetch_workouts(offline=offline,options=f"[{DB_Enums.WEEK}]={this_week}")
-        user_settings = parse_settings(offline)    
+        user_settings = parse_settings(offline=offline,week_str=current_week_key())
         return parse_workouts(workout_data,user_settings)
     except Exception as e:
         print(e)
@@ -26,12 +31,13 @@ def fetch_workouts(offline=False,options=None):
     return counted_workouts_df
 
 #Change to save week this setting applies?
-def parse_settings(offline=False):
+@st.cache_data(persist="disk")
+def parse_settings(week_str:str,offline=False):
+    print("Fetching settings table, not from cache")
     data = st.session_state.db_connection.fetch_data_table(
         table_id=DB_Enums.USER_SETTINGS_DB,
         offline=offline
     )
-
     return data
 
 def parse_workouts(data,user_settings):

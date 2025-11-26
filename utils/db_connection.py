@@ -1,7 +1,9 @@
+from datetime import datetime
 import json
 import requests
 from streamlit import secrets
 import pandas as pd
+from utils.db_enums import DB_Enums
 
 class DB_Connection:
     def __init__(self):
@@ -25,6 +27,10 @@ class DB_Connection:
         data = next(iter(data.values()))
         df = pd.DataFrame(data)
         df = df.drop("id",axis=1)
+        if(offline):
+            if(DB_Enums.WEEK.value in df):
+                filtered_df = df[df[DB_Enums.WEEK.value]==datetime.today().isocalendar().week]
+                df = filtered_df
         print(df)
         return df
 
@@ -33,6 +39,8 @@ class DB_Connection:
             print("Checking in locally")
             with open(f"data/{table_id}.json") as f:
                 loaded_data = json.load(f)
+            print(loaded_data)
+            data[sheet_name].update({"id":99})
             loaded_data[sheet_name].append(data[sheet_name])
             with open(f"data/{table_id}.json","w") as f:
                 json.dump(loaded_data,f,indent=2)
